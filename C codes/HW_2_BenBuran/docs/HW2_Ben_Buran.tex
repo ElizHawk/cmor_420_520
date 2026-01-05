@@ -1,0 +1,151 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{listings}
+\usepackage{dirtree}
+\usepackage{fullpage}
+
+\title{CMOR 420/520, Homework \#2: \LaTeX{} Submission}
+\author{\texttt{bb118}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+\section{Directory organization} \label{DirectoryOrganizationSection}
+
+The below represents the organization of the main code files for the assignment. The submitted directory has more files than just those listed below, but the other files are not relevant for compilation of any of the assigned \texttt{.c} files.
+\dirtree{%
+.1 homework-2/.
+.2 include/.
+.3 MyMatrix.h.
+.2 src/.
+.3 MyMatrix.c.
+.2 test\_matmul.c.
+.2 time\_matmul.c.
+.2 test\_reshape.c.
+}
+
+%----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+\section{Compilation and Running} \label{CompilationSection}
+
+There are 3 scripts that compile to executable files within the project: \texttt{test\_matmul.c}, \texttt{time\_matmul.c}, and \texttt{test\_reshape.c}. The positions of these files within the main directory is captured in the organization tree in \S\ref{DirectoryOrganizationSection}. The compilation commands for each of these files respectively are as follows:
+\begin{enumerate}
+    \item (Compilation of \texttt{test\_matmul.c}) To get an executable named \texttt{test\_matmul} paste and execute the following into the terminal:
+    \begin{verbatim}
+        gcc -I./include src/MyMatrix.c test_matmul.c -o test_matmul
+    \end{verbatim}
+    To run the resulting executable, paste and execute the following into the terminal:
+    \begin{verbatim}
+        ./test_matmul
+    \end{verbatim}
+
+    \item (Compilation of \texttt{time\_matmul.c}) To get an executable named \texttt{time\_matmul} paste and execute the following into the terminal:
+    \begin{verbatim}
+        gcc -I./include src/MyMatrix.c time_matmul.c -o time_matmul
+    \end{verbatim}
+    If desiring to compile with \texttt{O0} optimization, paste and execute instead the following to obtain an executable named \texttt{time\_matmul\_O0}:
+    \begin{verbatim}
+        gcc -O0 -I./include src/MyMatrix.c time_matmul.c -o time_matmul_O0
+    \end{verbatim}
+    If desiring to compile with \texttt{O3} optimization, paste and execute instead the following to obtain an executable named \texttt{time\_matmul\_O3}:
+    \begin{verbatim}
+        gcc -O3 -I./include src/MyMatrix.c time_matmul.c -o time_matmul_O3
+    \end{verbatim}
+    To run the executable resulting from each of these compilations, paste and execute the following into the terminal, respectively:
+    \begin{verbatim}
+        ./time_matmul
+        ./time_matmul_O0
+        ./time_matmul_O3
+    \end{verbatim}
+
+    \item (Compilation of \texttt{test\_reshape.c}) To get an executable named \texttt{test\_reshape}, paste and execute the following into the terminal:
+    \begin{verbatim}
+        gcc -I./include src/MyMatrix.c test_reshape.c -o test_reshape
+    \end{verbatim}
+    To run the resulting executable, paste and execute the following into the terminal:
+    \begin{verbatim}
+        ./test_reshape
+    \end{verbatim}
+\end{enumerate}
+
+
+
+%----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+\section{Verification / Output} \label{OutputSection}
+
+The output of the executable obtained by compiling the \texttt{test\_matmul.c} script is:
+\begin{verbatim}
+    The maximum absolute difference between the true matrix product
+    and the computed matrix product is 0.000000000
+\end{verbatim}
+Within the code there is also a commented out part that also prints the matrix resulting from the product. If that code is un-commented, the output becomes:
+\begin{verbatim}
+    C = A * B =
+70.000000000 80.000000000 90.000000000 
+158.000000000 184.000000000 210.000000000 
+246.000000000 288.000000000 330.000000000 
+The maximum absolute difference between the true matrix product
+and the computed matrix product is 0.000000000
+\end{verbatim}
+
+The output of the executable obtained by compiling the \texttt{time\_matmul.c} script is \texttt{matrix\_runtimes.png}, which is included in the \texttt{docs} folder within the zipped directory. This image is printed here:
+\begin{center}
+    \includegraphics[scale=.6]{matrix_runtimes.png}
+\end{center}
+The data that was used to make this image with \texttt{plot\_runtimes.py} is also included in the main directory. These are the files \texttt{runtimes\_O0.txt} and \texttt{runtimes\_O3.txt}.
+
+The output of the executable obtained by compiling the \texttt{test\_reshape.c} is 
+\begin{verbatim}
+The matrix before reshaping is:
+   1.000    2.000    3.000    4.000 
+   5.000    6.000    7.000    8.000 
+   9.000   10.000   11.000   12.000 
+The matrix after reshaping is:
+   1.000    2.000    3.000 
+   4.000    5.000    6.000 
+   7.000    8.000    9.000 
+  10.000   11.000   12.000 
+\end{verbatim}
+
+%----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+\section{Questions}
+
+\begin{enumerate}
+    \item Let $A$ and $B$ denote the matrices in question, and suppose we are talking about appending $B$ to $A$ (either vertically or horizontally). Appending $B$ to $A$ vertically would be easier (than horizontally) because this corresponds to the rows of $B$ being appended to the rows of $A$. Thus, the contiguous list of rows (for the \texttt{MyMatrix} object this would be \texttt{A.data}) of $B$ can be appended to the contiguous list of rows of $A$, which is simple. Meanwhile, to append horizontally we need to edit each row of $A$, which in particular entails moving the values of the contiguous data around and inserting the values of $B$ in the middle of this contiguous data.
+
+    \item Yes we could define a contiguous column major format for an $m \times n$ matrix. The important thing to keep in mind is that now the first index of \texttt{MyMatrix.data} is now a column index instead of a row index. But if that is ok with the user/program context, then basically the same logic holds: we allocate a contiguous block of memory of length $n * \texttt{sizeof(double*)}$ for a sequence of pointers (each one now representing the beginning of a \textit{column}), we assign a contiguous block of memory of length $n * m * \texttt{sizeof(double)}$ for the elements of the matrix, we set \texttt{MyMatrix.data[0]} to point to the start of the contiguous block of elements of the matrix, and then we iteratively assign each pointer in the contiguous array of pointers to point to \texttt{MyMatrix.data[0]+i*}$n$ (notice how we now increment by $n$ instead of $m$).
+\end{enumerate}
+
+%----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+\section{Additional CMOR520 Tasks}
+
+As mentioned in \S\ref{CompilationSection}, to get an executable named \texttt{test\_reshape}, paste and execute the following into the terminal:
+\begin{verbatim}
+    gcc -I./include src/MyMatrix.c test_reshape.c -o test_reshape
+\end{verbatim}
+To run the test of the reshape function, first compile using the command above, and then paste and execute the following in your terminal:
+\begin{verbatim}
+    ./test_reshape
+\end{verbatim}
+As mentioned in \S\ref{OutputSection}, the output of \texttt{test\_reshape.c} is 
+\begin{verbatim}
+The matrix before reshaping is:
+   1.000    2.000    3.000    4.000 
+   5.000    6.000    7.000    8.000 
+   9.000   10.000   11.000   12.000 
+The matrix after reshaping is:
+   1.000    2.000    3.000 
+   4.000    5.000    6.000 
+   7.000    8.000    9.000 
+  10.000   11.000   12.000 
+\end{verbatim}
+
+\end{document}
